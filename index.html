@@ -1,1 +1,123 @@
-aaa
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="./assets/css/reset.css" />
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+  </body>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script
+    async
+    src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"
+  ></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react?dev",
+        "react-dom/client": "https://esm.sh/react-dom/client?dev"
+      }
+    }
+  </script>
+
+  <script src="./config.js"></script>
+
+  <script type="text/babel" data-type="module">
+    import React, { StrictMode } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { useState, useEffect } from 'react';
+
+    const api = axios.create({
+      baseURL: 'https://api.unsplash.com/',
+    });
+
+    let App = function MyApp() {
+      const [photos, setPhotos] = useState([]);
+      const [search, setSearch] = useState('wallpaper');
+
+      const getPhotos = async () => {
+        const query = search !== '' ? `&query=${search}` : '';
+
+        const response = await api.get(
+          `/search/photos?per_page=30${query}&client_id=${window.config.accessKey}`
+        );
+
+        setPhotos(response.data.results);
+      };
+
+      useEffect(() => {
+        getPhotos();
+      }, []);
+
+      return (
+        <div className="container">
+          <div className="input-container">
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Write here..."
+            />
+
+            <span onClick={getPhotos}>Go</span>
+          </div>
+
+          <div className="grid-container">
+            {photos.map((photo) => (
+              <div className="grid-item" key={photo.id}>
+                <img
+                  className="image"
+                  src={photo.urls.regular}
+                  alt={photo.alt_description}
+                />
+
+                <div className="user">
+                  <img
+                    src={photo.user.profile_image.small}
+                    alt={photo.alt_description}
+                  />
+
+                  <div className="info">
+                    <p className="name">{photo.user.first_name}</p>
+
+                    {photo.user.instagram_username && (
+                      <div className="ig-container">
+                        <i className="bi bi-instagram"></i>
+                        <p className="ig">{photo.user.instagram_username}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const root = createRoot(document.getElementById('root'));
+
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>
+    );
+  </script>
+</html>
