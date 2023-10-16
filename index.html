@@ -55,6 +55,8 @@
       const getPhotos = async () => {
         const query = search !== '' ? `&query=${search}` : '';
 
+        if (!query) return;
+
         const response = await api.get(
           `/search/photos?per_page=30${query}&client_id=${window.config.accessKey}`
         );
